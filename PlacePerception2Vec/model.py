@@ -106,6 +106,7 @@ class VisionGNN(nn.Module):
         x = self.patchifier(x)
         B, N, C, H, W = x.shape
         x = self.patch_embedding(x.view(B * N, -1)).view(B, N, -1)
+        x = x + self.pose_embedding
         x = self.blocks(x)
         return x
 

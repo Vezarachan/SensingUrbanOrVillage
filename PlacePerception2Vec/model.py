@@ -3,9 +3,111 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 
-class PlacePerception2Vec(nn.Module):
-    def __init__(self):
-        super(PlacePerception2Vec, self).__init__()
+class SimplePatchifier(nn.Module):
+    def __init__(self, patch_size=16):
+        super(SimplePatchifier, self).__init__()
+        self.patch_size = patch_size
+
+    def forward(self, x):
+        B, C, H, W = x.shape
+        x = ((x.permute(0, 2, 3, 1)
+             .unfold(1, self.patch_size, self.patch_size)
+             .unfold(2, self.patch_size, self.patch_size))
+             .contiguous()
+             .view(B, -1, C, self.patch_size, self.patch_size))
+        return x
+
+
+class TwoLayerNN(nn.Module):
+    def __init__(self, in_features, hidden_features=None, out_features=None):
+        super(TwoLayerNN, self).__init__()
+        out_features = out_features or in_features
+        hidden_features = hidden_features or in_features
+        self.layer = nn.Sequential(
+            nn.Linear(in_features, hidden_features),
+            nn.BatchNorm1d(hidden_features),
+            nn.GELU(),
+            nn.Linear(hidden_features, out_features)
+        )
+
+    def forward(self, x):
+        return self.layer(x) + x
+
+
+class ViGBlock(nn.Module):
+    def __init__(self, in_features, num_edges=9, head_num=1):
+        super(ViGBlock, self).__init__()
+        self.k = num_edges
+        self.num_edges = num_edges
+        self.in_layer1 = TwoLayerNN(in_features)
+        self.out_layer1 = TwoLayerNN(in_features)
+        self.droppath1 = nn.Identity()
+        self.in_layer2 = TwoLayerNN(in_features, in_features * 4)
+        self.out_layer2 = TwoLayerNN(in_features * 4)
+        self.droppath2 = nn.Identity()
+        self.multi_head_fc = nn.Conv1d(in_features * 2, in_features, 1, 1, groups=head_num)
+
+    def forward(self, x):
+        B, N, C = x.shape
+        sim = x @ x.transpose(-1, -2)
+        graph = sim.topk(self.k, dim=-1).indices
+
+        shortcut = x
+        x = self.in_layer1(x.view(B * N, -1)).view(B, N, -1)
+
+        # aggregation
+        neighbor_features = x[torch.arange(B).unsqueeze(-1).expand(-1, N).unsqueeze(-1), graph]
+        x = torch.stack([x, (neighbor_features - x.unsqueeze(-2)).amax(dim=-2)], dim=-1)
+
+        # update
+        # multi head
+        x = self.multi_head_fc(x.view(B * N, -1, 1)).view(B, N, -1)
+        x = self.droppath1(self.out_layer1(F.gelu(x).view(B * N, -1)).view(B, N, -1))
+        x = x + shortcut
+
+        x = self.droppath2(self.out_layer2(F.gelu(x).view(B * N, -1)).view(B, N, -1))
+        return x
+
+
+class VisionGNN(nn.Module):
+    def __init__(self, in_features=3 * 16 * 16,
+                 out_features=320,
+                 num_patches=196,
+                 num_vig_blocks=16,
+                 num_edges=9,
+                 head_num=1):
+        super(VisionGNN, self).__init__()
+        self.patchifier = SimplePatchifier(patch_size=16)
+        self.patch_embedding = nn.Sequential(
+            nn.Linear(in_features, out_features//2),
+            nn.BatchNorm1d(out_features//2),
+            nn.GELU(),
+            nn.Linear(out_features//2, out_features//4),
+            nn.BatchNorm1d(out_features//4),
+            nn.GELU(),
+            nn.Linear(out_features//4, out_features//8),
+            nn.BatchNorm1d(out_features//8),
+            nn.GELU(),
+            nn.Linear(out_features//8, out_features//4),
+            nn.BatchNorm1d(out_features//4),
+            nn.GELU(),
+            nn.Linear(out_features//4, out_features//2),
+            nn.BatchNorm1d(out_features//2),
+            nn.GELU(),
+            nn.Linear(out_features//2, out_features),
+            nn.BatchNorm1d(out_features),
+        )
+        self.pose_embedding = nn.Parameter(torch.rand(num_patches, out_features))
+        self.blocks = nn.Sequential(
+            *[ViGBlock(out_features, num_edges, head_num) for _ in range(num_vig_blocks)]
+        )
+
+    def forward(self, x):
+        x = self.patchifier(x)
+        B, N, C, H, W = x.shape
+        x = self.patch_embedding(x.view(B * N, -1)).view(B, N, -1)
+        x = self.blocks(x)
+        return x
 
 
 class MoCo(nn.Module):

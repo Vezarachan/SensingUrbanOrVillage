@@ -101,6 +101,7 @@ class VisionGNN(nn.Module):
         self.blocks = nn.Sequential(
             *[ViGBlock(out_features, num_edges, head_num) for _ in range(num_vig_blocks)]
         )
+        self.fc = nn.Linear(out_features * num_patches, 1024)
 
     def forward(self, x):
         x = self.patchifier(x)
@@ -108,6 +109,7 @@ class VisionGNN(nn.Module):
         x = self.patch_embedding(x.view(B * N, -1)).view(B, N, -1)
         x = x + self.pose_embedding
         x = self.blocks(x)
+        x = self.fc(x.view(B, -1))
         return x
 
 

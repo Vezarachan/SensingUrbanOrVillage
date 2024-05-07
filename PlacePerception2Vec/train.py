@@ -171,7 +171,7 @@ def main():
     optimizer = optim.AdamW(model.parameters(), lr=args.lr, weight_decay=args.weight_decay)
     data_loader = load_dataset(args.data, args.batch_size)
 
-    print(f'Print Frequency: {args.print_freq}, Cosine: {args.cos}, dataset size: {len(data_loader)}')
+    print(f'Print Frequency: {args.print_freq}, Cosine: {args.cos}, dataset size: {len(data_loader.dataset)}')
     print(model)
 
     for epoch in range(args.start_epoch, args.epochs):

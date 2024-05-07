@@ -10,7 +10,7 @@ from torch.utils.data import DataLoader
 from torchvision import datasets
 from tqdm import tqdm
 from model import VisionGNN, MoCo
-from loader import TwoCropsTransform, GaussianBlur
+from loader import TwoCropsTransform, GaussianBlur, UnlabeledStreetViewImageDataset
 
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -151,7 +151,7 @@ def load_dataset(path, batch_size):
         transforms.ToTensor(),
         transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
     ]
-    dataset = datasets.ImageFolder(path, transform=TwoCropsTransform(transforms.Compose(augmentation)))
+    dataset = UnlabeledStreetViewImageDataset(path, transform=TwoCropsTransform(transforms.Compose(augmentation)))
     dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
     return dataloader
 

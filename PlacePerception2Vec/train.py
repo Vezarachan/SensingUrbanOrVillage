@@ -7,7 +7,7 @@ import torch.nn as nn
 import torch.optim as optim
 from torchvision import transforms
 from torch.utils.data import DataLoader
-from torchvision imp100ort datasets
+from torchvision import datasets
 from tqdm import tqdm
 from model import VisionGNN, MoCo
 from loader import TwoCropsTransform, GaussianBlur, UnlabeledStreetViewImageDataset

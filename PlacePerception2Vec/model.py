@@ -181,6 +181,6 @@ class MoCo(nn.Module):
 
         logits, labels = self.InfoNCE_logits(f_q, f_k)
 
-        self._update_queue()
+        self._update_queue(f_k)
 
         return logits, labels

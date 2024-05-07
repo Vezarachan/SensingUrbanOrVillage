@@ -198,8 +198,8 @@ def train_step(model, dataloader, optimizer, criterion, device_, epoch, args):
     )
 
     model.train()
-    train_bar = tqdm(dataloader)
-    for i, images in train_bar:
+    end = time.time()
+    for i, images in enumerate(dataloader):
         images[0] = images[0].to(device_)
         images[1] = images[1].to(device_)
 

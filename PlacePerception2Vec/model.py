@@ -159,7 +159,7 @@ class MoCo(nn.Module):
         # f_mem = F.normalize(f_mem, dim=1)
 
         l_pos = torch.einsum('nc,nc->n', [f_q, f_k]).unsqueeze(-1)
-        l_neg = torch.einsum('nc,ck->nk', [f_q, f_mem]).unsqueeze(-1)
+        l_neg = torch.einsum('nc,ck->nk', [f_q, f_mem])
 
         logits = torch.cat((l_pos, l_neg), dim=1)
         logits /= self.t

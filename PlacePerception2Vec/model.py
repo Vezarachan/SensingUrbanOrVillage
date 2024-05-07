@@ -43,7 +43,7 @@ class ViGBlock(nn.Module):
         self.out_layer1 = TwoLayerNN(in_features)
         self.droppath1 = nn.Identity()
         self.in_layer2 = TwoLayerNN(in_features, in_features * 4)
-        self.out_layer2 = TwoLayerNN(in_features * 4)
+        self.out_layer2 = TwoLayerNN(in_features, in_features * 4)
         self.droppath2 = nn.Identity()
         self.multi_head_fc = nn.Conv1d(in_features * 2, in_features, 1, 1, groups=head_num)
 

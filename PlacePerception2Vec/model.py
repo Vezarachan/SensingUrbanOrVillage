@@ -151,14 +151,13 @@ class MoCo(nn.Module):
 
     def InfoNCE_logits(self, f_q, f_k):
         f_k = f_k.detach()
-        f_mem = self.queue.clone().detach()
 
         f_q = F.normalize(f_q, dim=1)
         f_k = F.normalize(f_k, dim=1)
-        f_mem = F.normalize(f_mem, dim=1)
+        # f_mem = F.normalize(f_mem, dim=1)
 
         l_pos = torch.einsum('nc,nc->n', [f_q, f_k]).unsqueeze(-1)
-        l_neg = torch.einsum('nc,ck->nk', [f_q, f_mem]).unsqueeze(-1)
+        l_neg = torch.einsum('nc,ck->nk', [f_q, self.queue.clone().detach()]).unsqueeze(-1)
 
         logits = torch.cat((l_pos, l_neg), dim=1)
         logits /= self.t

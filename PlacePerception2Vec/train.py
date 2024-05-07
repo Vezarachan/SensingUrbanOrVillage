@@ -141,7 +141,7 @@ parser.add_argument("--cos", action="store_true", help="use cosine lr schedule")
 
 def load_dataset(path, batch_size):
     augmentation = [
-        transforms.RandomResizedCrop(224, scale=(0.2, 1.0)),
+        transforms.Resize(224),
         transforms.RandomApply(
             [transforms.ColorJitter(0.4, 0.4, 0.4, 0.1)], p=0.8  # not strengthened
         ),

@@ -158,11 +158,11 @@ def load_dataset(path, batch_size):
 
 def main():
     args = parser.parse_args()
-    model = MoCo(VisionGNN(), VisionGNN(),
+    model = MoCo(VisionGNN, VisionGNN,
                  dim=args.moco_dim,
                  queue_size=args.moco_k,
                  m=args.moco_m,
-                 t=args.moco_t)
+                 t=args.moco_t,)
     print(model)
     model = model.cuda(device)
     criterion = nn.CrossEntropyLoss().cuda(device)

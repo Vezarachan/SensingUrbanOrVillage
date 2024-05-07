@@ -75,7 +75,8 @@ class VisionGNN(nn.Module):
                  num_patches=196,
                  num_vig_blocks=16,
                  num_edges=9,
-                 head_num=1):
+                 head_num=1,
+                 num_classes=1024):
         super(VisionGNN, self).__init__()
         self.patchifier = SimplePatchifier(patch_size=16)
         self.patch_embedding = nn.Sequential(
@@ -101,7 +102,7 @@ class VisionGNN(nn.Module):
         self.blocks = nn.Sequential(
             *[ViGBlock(out_features, num_edges, head_num) for _ in range(num_vig_blocks)]
         )
-        self.fc = nn.Linear(out_features * num_patches, 1024)
+        self.fc = nn.Linear(out_features * num_patches, num_classes)
 
     def forward(self, x):
         x = self.patchifier(x)
@@ -114,10 +115,10 @@ class VisionGNN(nn.Module):
 
 
 class MoCo(nn.Module):
-    def __init__(self, encoder_q, encoder_k, dim=128, queue_size=65536, t=0.07, m=0.999):
+    def __init__(self, base_encoder, dim=128, queue_size=65536, t=0.07, m=0.999):
         super(MoCo, self).__init__()
-        self.encoder_q = encoder_q
-        self.encoder_k = encoder_k
+        self.encoder_q = base_encoder(num_classes=dim)
+        self.encoder_k = base_encoder(num_classes=dim)
         self.queue_size = queue_size
         self.t = t
         self.m = m
@@ -151,13 +152,14 @@ class MoCo(nn.Module):
 
     def InfoNCE_logits(self, f_q, f_k):
         f_k = f_k.detach()
+        f_mem = self.queue.clone().detach()
 
         f_q = F.normalize(f_q, dim=1)
         f_k = F.normalize(f_k, dim=1)
         # f_mem = F.normalize(f_mem, dim=1)
 
         l_pos = torch.einsum('nc,nc->n', [f_q, f_k]).unsqueeze(-1)
-        l_neg = torch.einsum('nc,ck->nk', [f_q, self.queue.clone().detach()]).unsqueeze(-1)
+        l_neg = torch.einsum('nc,ck->nk', [f_q, f_mem]).unsqueeze(-1)
 
         logits = torch.cat((l_pos, l_neg), dim=1)
         logits /= self.t

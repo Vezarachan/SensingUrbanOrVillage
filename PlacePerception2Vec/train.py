@@ -7,7 +7,7 @@ import torch.nn as nn
 import torch.optim as optim
 from torchvision import transforms
 from torch.utils.data import DataLoader
-from torchvision import datasets
+from torchvision imp100ort datasets
 from tqdm import tqdm
 from model import VisionGNN, MoCo
 from loader import TwoCropsTransform, GaussianBlur, UnlabeledStreetViewImageDataset
@@ -141,7 +141,7 @@ parser.add_argument("--cos", action="store_true", help="use cosine lr schedule")
 
 def load_dataset(path, batch_size):
     augmentation = [
-        transforms.Resize(224),
+        transforms.Resize((224, 224)),
         transforms.RandomApply(
             [transforms.ColorJitter(0.4, 0.4, 0.4, 0.1)], p=0.8  # not strengthened
         ),

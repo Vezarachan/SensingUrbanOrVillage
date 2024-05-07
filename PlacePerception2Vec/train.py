@@ -71,6 +71,7 @@ parser.add_argument(
     default=10,
     type=int,
     metavar="N",
+    dest='print_freq',
     help="print frequency (default: 10)",
 )
 parser.add_argument(
@@ -163,6 +164,7 @@ def main():
                  queue_size=args.moco_k,
                  m=args.moco_m,
                  t=args.moco_t,)
+    print(f'Print Frequency: {args.print_freq}, Cosine: {args.cos}')
     print(model)
     model = model.cuda(device)
     criterion = nn.CrossEntropyLoss().cuda(device)

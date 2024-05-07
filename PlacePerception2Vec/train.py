@@ -164,12 +164,15 @@ def main():
                  queue_size=args.moco_k,
                  m=args.moco_m,
                  t=args.moco_t,)
-    print(f'Print Frequency: {args.print_freq}, Cosine: {args.cos}')
-    print(model)
+
     model = model.cuda(device)
     criterion = nn.CrossEntropyLoss().cuda(device)
-    optimizer = optim.SGD(model.parameters(), lr=args.lr, momentum=args.momentum, weight_decay=args.weight_decay)
+    # optimizer = optim.SGD(model.parameters(), lr=args.lr, momentum=args.momentum, weight_decay=args.weight_decay)
+    optimizer = optim.AdamW(model.parameters(), lr=args.lr, weight_decay=args.weight_decay)
     data_loader = load_dataset(args.data, args.batch_size)
+
+    print(f'Print Frequency: {args.print_freq}, Cosine: {args.cos}, dataset size: {len(data_loader)}')
+    print(model)
 
     for epoch in range(args.start_epoch, args.epochs):
         adjust_learning_rate(optimizer, epoch, args)

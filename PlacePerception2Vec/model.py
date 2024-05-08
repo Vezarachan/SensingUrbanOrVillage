@@ -138,7 +138,7 @@ class MoCo(nn.Module):
     def _update_queue(self, keys):
         batch_size = keys.size(0)
         ptr = int(self.queue_ptr)
-        self.queue[:, ptr:ptr + batch_size] = keys.T
+        self.queue[:, ptr:ptr + batch_size] = keys
         ptr = (ptr + batch_size) % self.queue_size
         self.queue_ptr[0] = ptr
 

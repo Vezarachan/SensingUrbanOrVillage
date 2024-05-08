@@ -18,9 +18,9 @@ class SimplePatchifier(nn.Module):
         return x
 
 
-class TwoLayerNN(nn.Module):
+class FFN(nn.Module):
     def __init__(self, in_features, hidden_features=None, out_features=None):
-        super(TwoLayerNN, self).__init__()
+        super(FFN, self).__init__()
         out_features = out_features or in_features
         hidden_features = hidden_features or in_features
         self.layer = nn.Sequential(
@@ -39,11 +39,11 @@ class ViGBlock(nn.Module):
         super(ViGBlock, self).__init__()
         self.k = num_edges
         self.num_edges = num_edges
-        self.in_layer1 = TwoLayerNN(in_features)
-        self.out_layer1 = TwoLayerNN(in_features)
+        self.in_layer1 = FFN(in_features)
+        self.out_layer1 = FFN(in_features)
         self.droppath1 = nn.Identity()
-        self.in_layer2 = TwoLayerNN(in_features, in_features * 4)
-        self.out_layer2 = TwoLayerNN(in_features, in_features * 4)
+        self.in_layer2 = FFN(in_features, in_features * 4)
+        self.out_layer2 = FFN(in_features, in_features * 4)
         self.droppath2 = nn.Identity()
         self.multi_head_fc = nn.Conv1d(in_features * 2, in_features, 1, 1, groups=head_num)
 
@@ -137,7 +137,7 @@ class MoCo(nn.Module):
     @torch.no_grad()
     def _momentum_update_key_encoder(self):
         for param_q, param_k in zip(self.encoder_q.parameters(), self.encoder_k.parameters()):
-            param_k.data = param_k.data * self.m + param_q.data * (1.0 - self.m)
+            param_k.data = param_k.data * self.m + param_q.detach().data * (1.0 - self.m)
 
     @torch.no_grad()
     def _update_queue(self, keys):

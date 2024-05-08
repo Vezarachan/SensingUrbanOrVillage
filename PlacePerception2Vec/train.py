@@ -208,6 +208,7 @@ def train_step(model, dataloader, optimizer, criterion, device_, epoch, args):
         images[0] = images[0].to(device_)
         images[1] = images[1].to(device_)
 
+        optimizer.zero_grad()
         output, target = model(images[0], images[1])
         loss = criterion(output, target)
         acc1, acc5 = accuracy(output, target, topk=(1, 5))
@@ -216,7 +217,6 @@ def train_step(model, dataloader, optimizer, criterion, device_, epoch, args):
         top5.update(acc5[0], images[0].size(0))
 
         # compute gradient and do SGD step
-        optimizer.zero_grad()
         loss.backward()
         optimizer.step()
 

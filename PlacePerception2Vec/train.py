@@ -18,6 +18,15 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 parser = argparse.ArgumentParser(description="Urban Or Village")
 parser.add_argument("data", metavar="DIR", help="path to dataset")
 parser.add_argument(
+    "-j",
+    "--workers",
+    default=32,
+    type=int,
+    metavar="N",
+    dest='num_workers',
+    help="number of data loading workers (default: 32)",
+)
+parser.add_argument(
     "--epochs", default=200, type=int, metavar="N", help="number of total epochs to run"
 )
 parser.add_argument(
@@ -140,7 +149,7 @@ parser.add_argument(
 parser.add_argument("--cos", action="store_true", help="use cosine lr schedule")
 
 
-def load_dataset(path, batch_size):
+def load_dataset(path, batch_size, num_workers):
     augmentation = [
         transforms.Resize((224, 224)),
         transforms.RandomApply(
@@ -153,7 +162,7 @@ def load_dataset(path, batch_size):
         transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
     ]
     dataset = UnlabeledStreetViewImageDataset(path, transform=TwoCropsTransform(transforms.Compose(augmentation)))
-    dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
+    dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True, num_workers=num_workers, pin_memory=True)
     return dataloader
 
 
@@ -169,9 +178,9 @@ def main():
     criterion = nn.CrossEntropyLoss().cuda(device)
     # optimizer = optim.SGD(model.parameters(), lr=args.lr, momentum=args.momentum, weight_decay=args.weight_decay)
     optimizer = optim.AdamW(model.parameters(), lr=args.lr, weight_decay=args.weight_decay)
-    data_loader = load_dataset(args.data, args.batch_size)
+    data_loader = load_dataset(args.data, args.batch_size, args.num_workers)
 
-    print(f'Print Frequency: {args.print_freq}, Cosine: {args.cos}, dataset size: {len(data_loader.dataset)}')
+    print(f'Print Frequency: {args.print_freq}, lr: {args.lr}, Cosine: {args.cos}, dataset size: {len(data_loader.dataset)}, Workers: {args.num_workers}')
     print(model)
 
     for epoch in range(args.start_epoch, args.epochs):

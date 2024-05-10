@@ -172,7 +172,7 @@ def load_dataset(path, batch_size, num_workers):
 
 def main():
     args = parser.parse_args()
-    model = MoCo(resnet50,
+    model = MoCo(VisionGNN,
                  dim=args.moco_dim,
                  queue_size=args.moco_k,
                  m=args.moco_m,

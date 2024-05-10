@@ -102,7 +102,7 @@ class VisionGNN(nn.Module):
             *[ViGBlock(out_features, num_edges, head_num) for _ in range(num_vig_blocks)]
         )
         self.representation_vec = nn.Sequential(
-            nn.AdaptiveAvgPool2d(output_size=(1, 1)),
+            nn.AdaptiveAvgPool1d(output_size=(1, 1)),
             nn.Linear(out_features * num_patches, num_classes),
         )
 

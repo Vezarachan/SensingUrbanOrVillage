@@ -27,7 +27,7 @@ class FFN(nn.Module):
             nn.Linear(in_features, hidden_features),
             nn.BatchNorm1d(hidden_features),
             nn.GELU(),
-            nn.Linear(hidden_features, out_features)
+            nn.Linear(hidden_features, out_features),
         )
 
     def forward(self, x):
@@ -64,7 +64,7 @@ class ViGBlock(nn.Module):
         x = self.multi_head_fc(x.view(B * N, -1, 1)).view(B, N, -1)
         x = self.droppath1(self.out_layer1(F.gelu(x).view(B * N, -1)).view(B, N, -1))
         x = x + shortcut
-        x = self.droppath2(self.out_layer2(F.gelu(x).view(B * N, -1)).view(B, N, -1))
+        x = self.droppath2(self.out_layer2(F.gelu(x.view(B * N, -1)))).view(B, N, -1) + x
         return x
 
 

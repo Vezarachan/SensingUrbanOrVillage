@@ -7,8 +7,7 @@ import torch.nn as nn
 import torch.optim as optim
 from torchvision import transforms
 from torch.utils.data import DataLoader
-from torchvision import datasets
-from tqdm import tqdm
+from torchvision.models import resnet50
 from model import VisionGNN, MoCo
 from loader import TwoCropsTransform, GaussianBlur, UnlabeledStreetViewImageDataset
 
@@ -173,7 +172,7 @@ def load_dataset(path, batch_size, num_workers):
 
 def main():
     args = parser.parse_args()
-    model = MoCo(VisionGNN,
+    model = MoCo(resnet50,
                  dim=args.moco_dim,
                  queue_size=args.moco_k,
                  m=args.moco_m,

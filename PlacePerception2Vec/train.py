@@ -162,7 +162,12 @@ def load_dataset(path, batch_size, num_workers):
         transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
     ]
     dataset = UnlabeledStreetViewImageDataset(path, transform=TwoCropsTransform(transforms.Compose(augmentation)))
-    dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True, num_workers=num_workers, pin_memory=True)
+    dataloader = DataLoader(dataset,
+                            batch_size=batch_size,
+                            shuffle=True,
+                            num_workers=num_workers,
+                            pin_memory=True,
+                            drop_last=True)
     return dataloader
 
 

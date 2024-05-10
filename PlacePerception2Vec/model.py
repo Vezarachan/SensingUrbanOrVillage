@@ -120,7 +120,7 @@ class VisionGNN(nn.Module):
 
 
 class MoCo(nn.Module):
-    def __init__(self, base_encoder, dim=128, queue_size=65536, t=0.07, m=0.999):
+    def __init__(self, base_encoder, dim=128, queue_size=4096, t=0.07, m=0.999):
         super(MoCo, self).__init__()
         self.encoder_q = base_encoder(num_classes=dim)
         self.encoder_k = base_encoder(num_classes=dim)

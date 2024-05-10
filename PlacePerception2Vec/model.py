@@ -64,7 +64,6 @@ class ViGBlock(nn.Module):
         x = self.multi_head_fc(x.view(B * N, -1, 1)).view(B, N, -1)
         x = self.droppath1(self.out_layer1(F.gelu(x).view(B * N, -1)).view(B, N, -1))
         x = x + shortcut
-
         x = self.droppath2(self.out_layer2(F.gelu(x).view(B * N, -1)).view(B, N, -1))
         return x
 
@@ -75,7 +74,7 @@ class VisionGNN(nn.Module):
                  num_patches=196,
                  num_vig_blocks=16,
                  num_edges=9,
-                 head_num=1,
+                 head_num=4,
                  num_classes=1024):
         super(VisionGNN, self).__init__()
         self.patchifier = SimplePatchifier(patch_size=16)
@@ -103,10 +102,8 @@ class VisionGNN(nn.Module):
             *[ViGBlock(out_features, num_edges, head_num) for _ in range(num_vig_blocks)]
         )
         self.representation_vec = nn.Sequential(
-            nn.Linear(out_features * num_patches, 1024),
-            nn.BatchNorm1d(1024),
-            nn.GELU(),
-            nn.Linear(1024, num_classes),
+            nn.AdaptiveAvgPool2d(output_size=(1, 1)),
+            nn.Linear(out_features * num_patches, num_classes),
         )
 
     def forward(self, x):

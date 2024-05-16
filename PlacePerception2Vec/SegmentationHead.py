@@ -5,7 +5,6 @@ import torch.nn as nn
 import torch.nn.functional as F
 import timm
 import torchvision.transforms as T
-from visualization import semantic_inference
 
 
 def as_tuple(x):

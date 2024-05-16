@@ -19,7 +19,7 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 best_miou = 0.0
 
 
-def train_step(model, epoch, criterion, optimizer, data_loader):
+def train_step(model, epoch, criterion, optimizer, data_loader, args):
     running_loss = []
     model.train()
     train_bar = tqdm(data_loader)
@@ -39,7 +39,7 @@ def train_step(model, epoch, criterion, optimizer, data_loader):
     model.vit.save_lora_parameters(f'lora_epoch_{epoch}.safetensors')
 
 
-def validation_step(epoch, model, criterion, optimizer, data_loader, evaluator):
+def validation_step(epoch, model, criterion, optimizer, data_loader, evaluator, args):
     correct, total = 0, 0
     model.eval()
 
@@ -91,6 +91,8 @@ def main():
     parser.add_argument('--eval-interval', type=int, default=1,
                         help='evaluuation interval (default: 1)')
     parser.add_argument('--data', type=str, default=None, help='path to dataset')
+    parser.add_argument('--head_weights', type=str, default=None, help='path to saved head weights')
+    parser.add_argument('--lora_weights', type=str, default=None, help='path to saved vit weights')
 
     args = parser.parse_args()
 
@@ -115,9 +117,9 @@ def main():
     evaluator = Evaluator(num_class=19)
 
     for epoch in range(args.epochs):
-        train_step(model, epoch, criterion, optimizer, train_loader)
+        train_step(model, epoch, criterion, optimizer, train_loader, args)
         if epoch % args.eval_interval == (args.eval_interval - 1):
-            validation_step(epoch, model, criterion, optimizer, val_loader, evaluator)
+            validation_step(epoch, model, criterion, optimizer, val_loader, evaluator, args)
         scheduler.step()
 
 

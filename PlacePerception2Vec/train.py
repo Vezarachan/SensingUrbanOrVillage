@@ -35,8 +35,8 @@ def train_step(model, epoch, criterion, optimizer, data_loader, args):
         train_bar.set_description(
             f'Epoch: [{epoch}] Loss: {round(sum(running_loss) / len(running_loss), 6)}')
 
-    model.save_head_weight(f'head_epoch_{epoch}.pth')
-    model.vit.save_lora_parameters(f'lora_epoch_{epoch}.safetensors')
+    model.save_head_weight(f'{args.weight_path}/head_epoch_{epoch}.pth')
+    model.vit.save_lora_parameters(f'{args.weight_path}/lora_epoch_{epoch}.safetensors')
 
 
 def validation_step(epoch, model, criterion, optimizer, data_loader, evaluator, args):
@@ -70,8 +70,8 @@ def validation_step(epoch, model, criterion, optimizer, data_loader, evaluator, 
         if mIoU > best_miou:
             is_best = True
             best_miou = mIoU
-            model.save_head_weight(f'head_best.pth')
-            model.vit.save_lora_parameters(f'lora_best.safetensors')
+            model.save_head_weight(f'{args.weight_path}/head_best.pth')
+            model.vit.save_lora_parameters(f'{args.weight_path}/lora_best.safetensors')
 
 
 def save_checkpoint(state, is_best, filename="checkpoint.pth.tar"):
@@ -91,8 +91,7 @@ def main():
     parser.add_argument('--eval-interval', type=int, default=1,
                         help='evaluuation interval (default: 1)')
     parser.add_argument('--data', type=str, default=None, help='path to dataset')
-    parser.add_argument('--head_weights', type=str, default=None, help='path to saved head weights')
-    parser.add_argument('--lora_weights', type=str, default=None, help='path to saved vit weights')
+    parser.add_argument('--weight-path', type=str, default=None, help='path to saved weights')
 
     args = parser.parse_args()
 

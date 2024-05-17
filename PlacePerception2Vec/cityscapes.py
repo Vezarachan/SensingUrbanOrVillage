@@ -124,6 +124,7 @@ class Cityscapes(data.Dataset):
         target = self.encode_target(target)
         if self.transform:
             image, target = self.transform(image), self.transform(target)
+            target = torch.squeeze(target, dim=0)
         return image, target
 
     def __len__(self):
@@ -155,3 +156,4 @@ if __name__ == '__main__':
     dataset = Cityscapes('D:/Research/datasets/cityscapes/', split='train', transform=train_transforms)
     print(dataset[0])
     print(type(dataset[0][0]), type(dataset[0][1]))
+    print(dataset[0][0].shape, dataset[0][1].shape)

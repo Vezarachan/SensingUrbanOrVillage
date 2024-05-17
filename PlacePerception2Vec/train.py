@@ -55,18 +55,18 @@ def validation_step(epoch, model, criterion, optimizer, data_loader, evaluator, 
         pred = np.argmax(pred, axis=1)
         evaluator.add_batch(label, pred)
 
-        Acc = evaluator.Pixel_Accuracy()
-        Acc_class = evaluator.Pixel_Accuracy_Class()
-        mIoU = evaluator.Mean_Intersection_over_Union()
-        print(f'Acc:{Acc}, Acc_class:{Acc_class}, mIoU:{mIoU}')
-        print(f'Loss: {test_loss}')
+    Acc = evaluator.Pixel_Accuracy()
+    Acc_class = evaluator.Pixel_Accuracy_Class()
+    mIoU = evaluator.Mean_Intersection_over_Union()
+    print(f'Acc:{Acc}, Acc_class:{Acc_class}, mIoU:{mIoU}')
+    print(f'Loss: {test_loss}')
+    print(f'best miou: {best_miou}')
 
-        print(f'best miou: {best_miou}')
-
-        if mIoU > best_miou:
-            best_miou = mIoU
-            model.save_head_weight(f'{args.weight_path}/head_best.pth')
-            model.vit.save_lora_parameters(f'{args.weight_path}/lora_best.safetensors')
+    if mIoU > best_miou:
+        best_miou = mIoU
+        model.save_head_weight(f'{args.weight_path}/head_best.pth')
+        model.vit.save_lora_parameters(f'{args.weight_path}/lora_best.safetensors')
+    return best_miou
 
 
 def save_checkpoint(state, is_best, filename="checkpoint.pth.tar"):
@@ -114,7 +114,7 @@ def main():
     for epoch in range(args.epochs):
         train_step(model, epoch, criterion, optimizer, train_loader, args)
         if epoch % args.eval_interval == (args.eval_interval - 1):
-            validation_step(epoch, model, criterion, optimizer, val_loader, evaluator, best_miou, args)
+            best_miou = validation_step(epoch, model, criterion, optimizer, val_loader, evaluator, best_miou, args)
             print(best_miou)
         scheduler.step()
 

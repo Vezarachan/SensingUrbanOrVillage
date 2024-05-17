@@ -16,7 +16,6 @@ from torch.utils.data import DataLoader
 from cityscapes import Cityscapes
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-best_miou = 0.0
 
 
 def train_step(model, epoch, criterion, optimizer, data_loader, args):
@@ -38,8 +37,7 @@ def train_step(model, epoch, criterion, optimizer, data_loader, args):
     model.vit.save_lora_parameters(f'{args.weight_path}/lora_epoch_{epoch}.safetensors')
 
 
-def validation_step(epoch, model, criterion, optimizer, data_loader, evaluator, args):
-    correct, total = 0, 0
+def validation_step(epoch, model, criterion, optimizer, data_loader, evaluator, best_miou, args):
     model.eval()
 
     validation_bar = tqdm(data_loader)
@@ -66,7 +64,6 @@ def validation_step(epoch, model, criterion, optimizer, data_loader, evaluator, 
         print(f'best miou: {best_miou}')
 
         if mIoU > best_miou:
-            is_best = True
             best_miou = mIoU
             model.save_head_weight(f'{args.weight_path}/head_best.pth')
             model.vit.save_lora_parameters(f'{args.weight_path}/lora_best.safetensors')
@@ -112,11 +109,13 @@ def main():
     train_loader = DataLoader(cityscapes_train, batch_size=args.batch_size, shuffle=True, num_workers=2)
     val_loader = DataLoader(cityscapes_val, batch_size=args.batch_size, shuffle=False, num_workers=2)
     evaluator = Evaluator(num_class=19)
+    best_miou = 0.0
 
     for epoch in range(args.epochs):
         train_step(model, epoch, criterion, optimizer, train_loader, args)
         if epoch % args.eval_interval == (args.eval_interval - 1):
-            validation_step(epoch, model, criterion, optimizer, val_loader, evaluator, args)
+            validation_step(epoch, model, criterion, optimizer, val_loader, evaluator, best_miou, args)
+            print(best_miou)
         scheduler.step()
 
 

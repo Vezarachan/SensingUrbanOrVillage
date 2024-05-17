@@ -106,8 +106,8 @@ def main():
     ])
     cityscapes_train = Cityscapes(args.data, split='train', transform=train_transforms)
     cityscapes_val = Cityscapes(args.data, split='val', transform=val_transforms)
-    train_loader = DataLoader(cityscapes_train, batch_size=args.batch_size, shuffle=True, num_workers=2)
-    val_loader = DataLoader(cityscapes_val, batch_size=args.batch_size, shuffle=False, num_workers=2)
+    train_loader = DataLoader(cityscapes_train, batch_size=args.batch_size, shuffle=True, num_workers=32)
+    val_loader = DataLoader(cityscapes_val, batch_size=args.batch_size, shuffle=False, num_workers=32)
     evaluator = Evaluator(num_class=19)
     best_miou = 0.0
 

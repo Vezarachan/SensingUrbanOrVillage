@@ -87,6 +87,7 @@ def main():
                         help='evaluuation interval (default: 1)')
     parser.add_argument('--data', type=str, default=None, help='path to dataset')
     parser.add_argument('--weight-path', type=str, default=None, help='path to saved weights')
+    parser.add_argument('--num-workers', type=int, default=4, help='number of workers')
 
     args = parser.parse_args()
 
@@ -106,8 +107,8 @@ def main():
     ])
     cityscapes_train = Cityscapes(args.data, split='train', transform=train_transforms)
     cityscapes_val = Cityscapes(args.data, split='val', transform=val_transforms)
-    train_loader = DataLoader(cityscapes_train, batch_size=args.batch_size, shuffle=True, num_workers=32)
-    val_loader = DataLoader(cityscapes_val, batch_size=args.batch_size, shuffle=False, num_workers=32)
+    train_loader = DataLoader(cityscapes_train, batch_size=args.batch_size, shuffle=True, num_workers=args.num_workers)
+    val_loader = DataLoader(cityscapes_val, batch_size=args.batch_size, shuffle=False, num_workers=args.num_workers)
     evaluator = Evaluator(num_class=19)
     best_miou = 0.0
 

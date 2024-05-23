@@ -72,10 +72,10 @@ class ViTWithLoRA(nn.Module):
         k_a_tensors = {f"w_k_a_{i:03d}": block.attn.qkv.lora_k.W_a.weight for i, block in enumerate(self.vit.blocks)}
         q_b_tensors = {f"w_q_b_{i:03d}": block.attn.qkv.lora_q.W_b.weight for i, block in enumerate(self.vit.blocks)}
         k_b_tensors = {f"w_k_b_{i:03d}": block.attn.qkv.lora_k.W_b.weight for i, block in enumerate(self.vit.blocks)}
-        _in = self.vit.head.in_features
-        _out = self.vit.head.out_features
-        fc_tensors = {f"fc_{_in}in_{_out}out": self.vit.head.weight}
-        merge_dict = {**q_a_tensors, **k_a_tensors, **q_b_tensors, **k_b_tensors, **fc_tensors}
+        # _in = self.vit.head.in_features
+        # _out = self.vit.head.out_features
+        # fc_tensors = {f"fc_{_in}in_{_out}out": self.vit.head.weight}
+        merge_dict = {**q_a_tensors, **k_a_tensors, **q_b_tensors, **k_b_tensors}
         save_file(merge_dict, filename)
 
     def load_lora_parameters(self, filename):
@@ -94,14 +94,14 @@ class ViTWithLoRA(nn.Module):
                 saved_k_b_key = f"w_k_b_{i:03d}"
                 saved_k_b_tensor = f.get_tensor(saved_k_b_key)
                 block.attn.qkv.lora_k.W_b.weight = Parameter(saved_k_b_tensor)
-            _in = self.vit.head.in_features
-            _out = self.vit.head.out_features
-            saved_key = f"fc_{_in}in_{_out}out"
-            try:
-                saved_tensor = f.get_tensor(saved_key)
-                self.vit.head.weight = Parameter(saved_tensor)
-            except ValueError:
-                print("this fc weight is not for this model")
+            # _in = self.vit.head.in_features
+            # _out = self.vit.head.out_features
+            # saved_key = f"fc_{_in}in_{_out}out"
+            # try:
+            #     saved_tensor = f.get_tensor(saved_key)
+            #     self.vit.head.weight = Parameter(saved_tensor)
+            # except ValueError:
+            #     print("this fc weight is not for this model")
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         return self.vit.forward_features(x)

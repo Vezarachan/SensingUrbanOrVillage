@@ -38,15 +38,15 @@ class SegWrapForViT(nn.Module):
         torch.save(self.deeplab_head.state_dict(), filename)
 
     def load_head_weight(self, filename):
-        self.deeplab_head.load_state_dict(torch.load(filename))
+        self.deeplab_head.load_state_dict(torch.load(filename, map_location='cpu'))
 
 
 if __name__ == '__main__':
     img = torch.randn(3, 3, 1024, 2048)
-    model = timm.create_model('vit_small_patch16_384.augreg_in21k_ft_in1k', pretrained=True)
-    vit_with_lora = ViTWithLoRA(model, 8, 1.0)
-    seg_vit = SegWrapForViT(vit_model=vit_with_lora, image_size=384,
-                            patches=16, dim=384, num_classes=19)
+    model = timm.create_model('vit_base_patch14_dinov2', pretrained=True)
+    vit_with_lora = ViTWithLoRA(model, 16, 1.0)
+    seg_vit = SegWrapForViT(vit_model=vit_with_lora, image_size=518,
+                            patches=14, dim=768, num_classes=19)
     mask = seg_vit(img)
     num_params = sum(p.numel() for p in seg_vit.parameters() if p.requires_grad)
     print(mask.shape)

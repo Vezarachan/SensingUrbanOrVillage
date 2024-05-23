@@ -2,7 +2,7 @@ import os
 
 
 # FILE_PATH = './Datasets/Images'
-FILE_PATH = 'D:/Research/datasets/UrbanOrRural/VillageImages'
+FILE_PATH = 'D:/Research/datasets/UrbanOrRural/Stuttgart/Images'
 
 
 def get_file_path_by_name(file_dir):

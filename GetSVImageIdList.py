@@ -7,7 +7,7 @@ from utils import FILE_PATH, IMAGE_SEARCH_URL
 
 def get_image_url_list_locally(samples_file):
 
-    with open('D:/Research/datasets/BayernPOIs/SamplePoints/{0}.geojson'.format(samples_file), 'r') as f:
+    with open(f'./Datasets/SamplePoints/Stuttgart/{samples_file}.geojson', 'r') as f:
         sample_points = geojson.load(f)
     # with open('./Datasets/SamplePoints/Munich/{0}.geojson'.format(samples_file), 'r') as f:
     #     sample_points = geojson.load(f)
@@ -16,8 +16,10 @@ def get_image_url_list_locally(samples_file):
 
     image_ids = list()
 
-    for feature in sample_points['features']:
+    for i, feature in enumerate(sample_points['features']):
         print(feature)
+        if i < 23816:
+            continue
         coord = feature['geometry']['coordinates']
         x, y = coord
         min_lon = x - 0.0004

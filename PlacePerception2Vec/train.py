@@ -91,9 +91,9 @@ def main():
 
     args = parser.parse_args()
 
-    vit = timm.create_model('vit_small_patch16_384.augreg_in21k_ft_in1k', pretrained=True)
+    vit = timm.create_model('vit_base_patch14_dinov2', pretrained=True)
     lora_model = ViTWithLoRA(vit, 8, 1.0)
-    model = SegWrapForViT(lora_model, 384, 16, 384, 19).to(device)
+    model = SegWrapForViT(vit_model=lora_model, image_size=518, patches=14, dim=768, num_classes=19).to(device)
     criterion = nn.CrossEntropyLoss(ignore_index=255)
     optimizer = optim.AdamW(model.parameters(), lr=args.lr, weight_decay=0.01)
     scheduler = CosineAnnealingLR(optimizer, T_max=1000, eta_min=0, last_epoch=-1, verbose=False)

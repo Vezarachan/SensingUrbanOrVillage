@@ -92,7 +92,7 @@ def main():
     args = parser.parse_args()
 
     vit = timm.create_model('vit_base_patch14_dinov2', pretrained=True)
-    lora_model = ViTWithLoRA(vit, 8, 16)
+    lora_model = ViTWithLoRA(vit, 1, 1)
     model = SegWrapForViT(vit_model=lora_model, image_size=518, patches=14, dim=768, num_classes=19).to(device)
     criterion = nn.CrossEntropyLoss(ignore_index=255)
     optimizer = optim.AdamW(model.parameters(), lr=args.lr, weight_decay=0.01)

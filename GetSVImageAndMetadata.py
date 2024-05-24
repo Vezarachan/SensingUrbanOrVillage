@@ -5,7 +5,7 @@ import pandas as pd
 import numpy as np
 from utils import FILE_PATH, IMAGE_SEARCH_URL, IMAGE_URL
 
-IMAGE_NAME = '{0}/{1}/{2},{3}.jpg'
+IMAGE_NAME = '{0}/{1},{2},{3}.jpg'
 IMAGE_METADATA = '{0}/{1}/{2}.csv'
 
 
@@ -49,11 +49,11 @@ def save_sv_images_with_metadata(file_path, samples_file, output_file):
                 detected_objects_str = ''
 
             img_data = requests.get(image_url).content
-            with open(IMAGE_NAME.format(file_path, samples_file, x, y), 'wb') as handler:
+            with open(IMAGE_NAME.format(file_path, image_id, x, y), 'wb') as handler:
                 handler.write(img_data)
 
-            with open(IMAGE_METADATA.format(file_path, samples_file, output_file), 'a') as metadata:
-                metadata.write('{0},{1},{2},{3},{4}\n'.format(image_id, x, y, captured_at, detected_objects_str))
+            # with open(IMAGE_METADATA.format(file_path, samples_file, output_file), 'a') as metadata:
+            #     metadata.write('{0},{1},{2},{3},{4}\n'.format(image_id, x, y, captured_at, detected_objects_str))
 
 
 def re_save_images_wrong(filepath):
